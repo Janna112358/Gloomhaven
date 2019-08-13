@@ -7,7 +7,7 @@ Created on Tue Aug 13 15:25:10 2019
 """
 import numpy as np
 import matplotlib.pyplot as plt
-from Gloomhaven import max_turns, turns_lost, turns_lost_from_disc
+from Gloomhaven import max_turns, turns_lost, turns_lost_from_disc, turns_lost_early_rest
 
 def mask_value(a, val):
     """
@@ -124,4 +124,26 @@ if __name__ == '__main__':
     nice_color_plot(lost2, title='Preventing damage from discard', 
                     cb_label='turns lost', save_path='Gloomhaven_damage_from_disc.png')
     
+    # compute turns lost to early resting
+    lost3 = np.zeros_like(turns)
+    for i, j in np.ndindex(lost3.shape):
+        hand = all_hand[i]
+        disc = all_disc[j]
+        
+        # mask (with -1) if hand+disc > max cards
+        if hand + disc > max_cards:
+            lost3[i, j] = -1
+        
+        # also mask if we are unable to rest
+        elif disc == 0:
+            lost3[i, j] = -1
+            
+        else:
+            lost3[i, j] = turns_lost_early_rest(hand, disc)
+            
+    # mask properly
+    lost3 = mask_value(lost3, -1)
+    
+    nice_color_plot(lost3, title='Early resting', cb_label='turns_lost',
+                    save_path='Gloomhaven_early_resting.png')
     
